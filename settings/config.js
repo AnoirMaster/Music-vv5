@@ -1,7 +1,8 @@
 module.exports = {
     // TOKEN has become TOKENS and is now an array
     TOKENS: [
-        "MTM2NTMxMTcwMDY1NTUzODI1OA.Gwo0Gs.dQHzGtBoaRam9syr7yVmV1oQd2XMSMAeEpQRDc", // Replace with your actual Discord bot token // Optional second token
+        "your_token_1", // Replace with your actual Discord bot token
+        "your_token_2", // Optional second token
         //"your_token_3", // Exemple Optional third token
         // Add more tokens here if needed
     ],
@@ -20,8 +21,8 @@ module.exports = {
     SPOTIFY_TRACKS: true, // true = support Spotify, false = disable
 
     // Spotify credentials used for API authentication
-    SPOTIFY_ID: "d88ae160709140ac88b56c3ee8f8aea0", // Replace with your Spotify client ID
-    SPOTIFY_SECRET: "0485e2d167a94e69922ff977ccb8e033", // Replace with your Spotify client secret
+    SPOTIFY_ID: "your_spotify_client_id", // Replace with your Spotify client ID
+    SPOTIFY_SECRET: "your_spotify_client_secret", // Replace with your Spotify client secret
 }
 
 // Converts various string/boolean inputs into a proper boolean
