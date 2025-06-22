@@ -1,0 +1,89 @@
+const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
+const { DisTube } = require('distube');
+const { SoundCloudPlugin } = require('@distube/soundcloud');
+const { SpotifyPlugin } = require('@distube/spotify');
+const { DeezerPlugin } = require('@distube/deezer');
+const { YouTubePlugin } = require('@distube/youtube');
+const { DirectLinkPlugin } = require('@distube/direct-link');
+const { YtDlpPlugin } = require('@distube/yt-dlp');
+const { AppleMusicPlugin } = require('distube-apple-music');
+const { TidalPlugin } = require('distube-tidal');
+
+class MainClient extends Client {
+    // MODIFICATION : Le constructeur accepte maintenant un 'token'
+    constructor(token) {
+        super({
+            shards: "auto",
+            allowedMentions: { parse: ["users", "roles"] },
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMembers,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.GuildVoiceStates,
+                GatewayIntentBits.MessageContent,
+            ],
+            partials: [Partials.Channel, Partials.Message]
+        });
+
+    process.on('unhandledRejection', error => console.log(error));
+    process.on('uncaughtException', error => console.log(error));
+
+    this.config = require('./settings/config.js');
+    this.owner = this.config.OWNER_ID;
+    this.color = this.config.EMBED_COLOR;
+    // MODIFICATION : Le token est directement assigné depuis l'argument du constructeur
+    this.token = token;
+
+    const client = this;
+
+    this.distube = new DisTube(client, {
+        savePreviousSongs: true,
+        emitAddListWhenCreatingQueue: true,
+        emitAddSongWhenCreatingQueue: true,
+        plugins: [
+            new TidalPlugin(),
+            new AppleMusicPlugin(),
+            new DirectLinkPlugin(),
+            new YouTubePlugin(),
+            new SoundCloudPlugin(),
+            new DeezerPlugin(),
+            checkSpotify(client),
+            new YtDlpPlugin({ update: false })
+        ],
+    });
+
+    // START ADDITION: Initialize a Map to hold active now playing messages and their intervals
+    this.nowPlayingInstances = new Map();
+    // END ADDITION
+
+    ["slash"].forEach(x => client[x] = new Collection());
+    ["loadCommands", "loadEvents", "loadPlayer", "loadDatabase"].forEach(x => require(`./handlers/${x}`)(client));
+
+    }
+    connect() {
+        return super.login(this.token);
+    };
+};
+
+module.exports = MainClient;
+
+function checkSpotify(client) {
+    if (client.config.SPOTIFY_TRACKS) {
+        return spotifyOn(client);
+    } else {
+        return spotifyOff();
+    }
+}
+
+function spotifyOn(client) {
+    return new SpotifyPlugin({
+        api: {
+            clientId: client.config.SPOTIFY_ID,
+            clientSecret: client.config.SPOTIFY_SECRET
+        }
+    })
+}
+
+function spotifyOff() {
+    return new SpotifyPlugin({})
+}
